@@ -2,95 +2,311 @@ import logoDark from '@/assets/images/logo-dark.png';
 import logoLight from '@/assets/images/logo-light.png';
 import IconifyIcon from '@/components/client-wrapper/IconifyIcon';
 import PageMeta from '@/components/PageMeta';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import { login } from '@/service/serviceApi';
 
 const Index = () => {
-  return <>
-    <PageMeta title="Reset Password" />
-    <div className="relative min-h-screen w-full flex justify-center items-center py-16 md:py-10">
-      <div className="card md:w-lg w-screen z-10">
-        <div className="text-center px-10 py-12">
-          <Link to="/index" className="flex justify-center">
-            <img src={logoDark} alt="logo dark" className="h-6 flex dark:hidden" width={111} />
-            <img src={logoLight} alt="logo light" className="h-6 hidden dark:flex" width={111} />
-          </Link>
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-          <div className="mt-8 text-center">
-            <h4 className="mb-2.5 text-xl font-semibold text-primary">Welcome Back !</h4>
-            <p className="text-base text-default-500">Sign in to continue to Tailwick.</p>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      const response = await login({
+        email,
+        password
+      });
+
+      // Handle successful login
+      const { data } = response;
+
+      // Store token and user data in localStorage
+      if (data.data.token) {
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data));
+      }
+
+      // Show success message
+      toast.success(data.message || 'Login berhasil! Selamat datang kembali.', {
+        position: "top-center",
+        autoClose: 2000,
+      });
+
+      // Redirect to message page
+      setTimeout(() => {
+        navigate('/message');
+      }, 1000);
+
+    } catch (error) {
+      console.error('Login error:', error);
+
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with error status
+        const { status, data } = error.response;
+
+        switch (status) {
+          case 400:
+            toast.error(data.message || 'Email atau password tidak valid');
+            break;
+          case 401:
+            toast.error('Email atau password salah');
+            break;
+          case 403:
+            toast.error('Akun Anda tidak aktif. Silakan hubungi administrator');
+            break;
+          case 404:
+            toast.error('User tidak ditemukan');
+            break;
+          case 422:
+            // Validation errors
+            if (data.errors) {
+              const newErrors = {};
+              data.errors.forEach(err => {
+                newErrors[err.field] = err.message;
+              });
+              setErrors(newErrors);
+            }
+            toast.error(data.message || 'Data tidak valid');
+            break;
+          case 429:
+            toast.error('Terlalu banyak percobaan login. Silakan coba lagi nanti');
+            break;
+          case 500:
+            toast.error(data.message || 'Server error. Silakan coba lagi nanti');
+            break;
+          default:
+            toast.error(data.message || 'Terjadi kesalahan. Silakan coba lagi');
+        }
+      } else if (error.request) {
+        // Network error
+        toast.error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda');
+      } else {
+        // Other errors
+        toast.error('Terjadi kesalahan yang tidak terduga');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Email validation
+    if (!email.trim()) {
+      newErrors.email = 'Email diperlukan';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Format email tidak valid';
+    }
+
+    // Password validation
+    if (!password.trim()) {
+      newErrors.password = 'Password diperlukan';
+    } else if (password.length < 3) {
+      newErrors.password = 'Password minimal 6 karakter';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Clear specific field error when user starts typing
+  const clearFieldError = (field) => {
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleSubmit(e);
+    }
+  };
+
+  return <>
+    <PageMeta title="Login" />
+    <div className="relative min-h-screen w-full flex justify-center items-center px-4 py-10 md:py-16 bg-white dark:bg-gray-900">
+
+      {/* Main Card */}
+      <div className="card w-full max-w-md md:max-w-lg z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl">
+        <div className="text-center px-6 py-8 sm:px-10 sm:py-12">
+          {/* Logo */}
+          <div className="mb-8 transform hover:scale-105 transition-transform duration-300">
+            <Link to="/index" className="flex justify-center">
+              <img src={logoDark} alt="logo dark" className="w-20 h-20 flex dark:hidden drop-shadow-lg" />
+              <img src={logoLight} alt="logo light" className="w-20 h-20 hidden dark:flex drop-shadow-lg" />
+            </Link>
           </div>
 
-          <form action="/index" className="text-left w-full mt-10">
-            <div className="mb-4">
-              <label htmlFor="email" className="block font-medium text-default-900 text-sm mb-2">
-                Username/ Email ID
+          {/* Welcome Text */}
+          <div className="mb-8 fade-in-up">
+            <h4 className="mb-2 text-2xl sm:text-3xl font-bold gradient-text">
+              Selamat Datang!
+            </h4>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Masuk ke akun Anda untuk melanjutkan
+            </p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="text-left w-full space-y-5">
+            {/* Email Field */}
+            <div className="group fade-in-up">
+              <label htmlFor="email" className="block font-semibold text-gray-700 dark:text-gray-300 text-sm mb-2 transition-colors group-focus-within:text-blue-600">
+                Email
               </label>
-              <input type="text" id="email" className="form-input" placeholder="Enter Username or email" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <IconifyIcon icon="heroicons:envelope" className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-all duration-200 group-focus-within:scale-110" />
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearFieldError('email');
+                  }}
+                  onKeyPress={handleKeyPress}
+                  className={`form-input h-12 pl-10 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 hover:shadow-sm ${errors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''
+                    }`}
+                  placeholder="Masukkan email Anda"
+                  disabled={isLoading}
+                />
+                {email && !errors.email && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <IconifyIcon icon="heroicons:check-circle" className="h-5 w-5 text-green-500" />
+                  </div>
+                )}
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600 flex items-center animate-pulse">
+                  <IconifyIcon icon="heroicons:exclamation-triangle" className="w-4 h-4 mr-1" />
+                  {errors.email}
+                </p>
+              )}
             </div>
 
-            <div className="mb-4">
-              <Link to="/basic-reset-password" className="text-primary font-medium text-sm mb-2 float-end">
-                Forgot Password ?
-              </Link>
-              <label htmlFor="Password" className="block font-medium text-default-900 text-sm mb-2">
+            {/* Password Field */}
+            <div className="group fade-in-up">
+              <label htmlFor="password" className="block font-semibold text-gray-700 dark:text-gray-300 text-sm mb-2 transition-colors group-focus-within:text-blue-600">
                 Password
               </label>
-              <input type="password" id="Password" className="form-input" placeholder="Enter Password" />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <IconifyIcon icon="heroicons:lock-closed" className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-all duration-200 group-focus-within:scale-110" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearFieldError('password');
+                  }}
+                  onKeyPress={handleKeyPress}
+                  className={`form-input h-12 pl-10 pr-10 text-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 hover:shadow-sm ${errors.password ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''
+                    }`}
+                  placeholder="Masukkan password Anda"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-500 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <IconifyIcon
+                    icon={showPassword ? "heroicons:eye-slash" : "heroicons:eye"}
+                    className="h-5 w-5 text-gray-400"
+                  />
+                </button>
+                {password && !errors.password && (
+                  <div className="absolute inset-y-0 right-8 flex items-center">
+                    <IconifyIcon icon="heroicons:check-circle" className="h-5 w-5 text-green-500" />
+                  </div>
+                )}
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600 flex items-center animate-pulse">
+                  <IconifyIcon icon="heroicons:exclamation-triangle" className="w-4 h-4 mr-1" />
+                  {errors.password}
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 mb-4">
-              <input id="checkbox-1" type="checkbox" className="form-checkbox" />
-              <label className="text-default-900 text-sm font-medium" htmlFor="checkbox-1">
-                Remember Me
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between fade-in-up">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  disabled={isLoading}
+                />
+                <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Ingat saya</span>
               </label>
+              <Link
+                to="/auth/basic-reset-password"
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+              >
+                Lupa password?
+              </Link>
             </div>
 
-            <div className="mt-10 text-center">
-              <button type="submit" className="btn bg-primary text-white w-full">
-                Sign In
+            {/* Submit Button */}
+            <div className="pt-2 fade-in-up">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-full h-12 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none glow-animation"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Memproses...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <IconifyIcon icon="heroicons:arrow-right-on-rectangle" className="w-5 h-5 mr-2" />
+                    Masuk
+                  </div>
+                )}
               </button>
             </div>
-
-            <div className="my-9 relative text-center before:absolute before:top-2.5 before:left-0 before:border-t before:border-t-default-200 before:w-full before:h-0.5 before:right-0 before:-z-0">
-              <h4 className="relative z-1 py-0.5 px-2 inline-block font-medium text-default-600 bg-card">
-                Sign In With
-              </h4>
-            </div>
-
-            <div className="flex w-full justify-center items-center gap-2">
-              <Link to="#" className="btn border border-default-200 flex-grow hover:bg-default-150 shadow-sm hover:text-default-800">
-                <IconifyIcon icon={'logos:google-icon'} />
-                Use Google
-              </Link>
-
-              <Link to="#" className="btn border border-default-200 flex-grow hover:bg-default-150 shadow-sm hover:text-default-800">
-                <IconifyIcon icon={'logos:apple'} className="text-mono" />
-                Use Apple
-              </Link>
-            </div>
-
-            <div className="mt-10 text-center">
-              <p className="text-base text-default-500">
-                Don't have an Account ?{' '}
-                <Link to="/basic-register" className="font-semibold underline hover:text-primary transition duration-200">
-                  SignUp
-                </Link>
-              </p>
-            </div>
           </form>
+
+          {/* Sign Up Link */}
+          <div className="mt-8 text-center fade-in-up">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Belum punya akun?{' '}
+              <Link
+                to="/auth/basic-register"
+                className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+              >
+                Daftar sekarang
+              </Link>
+            </p>
+          </div>
+
         </div>
       </div>
 
-      <div className="absolute inset-0 overflow-hidden">
-        <svg aria-hidden="true" className="absolute inset-0 size-full fill-black/2 stroke-black/5 dark:fill-white/2.5 dark:stroke-white/2.5">
-          <defs>
-            <pattern id="authPattern" width="56" height="56" patternUnits="userSpaceOnUse" x="50%" y="16">
-              <path d="M.5 56V.5H72" fill="none"></path>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" strokeWidth="0" fill="url(#authPattern)"></rect>
-        </svg>
-      </div>
     </div>
   </>;
 };

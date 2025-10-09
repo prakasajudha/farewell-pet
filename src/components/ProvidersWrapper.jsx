@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import LayoutProvider from '@/context/useLayoutContext';
 import { useLocation } from 'react-router';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const ProvidersWrapper = ({
   children
 }) => {
@@ -30,7 +32,19 @@ const ProvidersWrapper = ({
     return () => observer.disconnect();
   }, []);
   return <>
-      <LayoutProvider>{children}</LayoutProvider>
-    </>;
+    <LayoutProvider>{children}</LayoutProvider>
+    <ToastContainer
+      position="top-center"
+      autoClose={1500}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="light"
+    />
+  </>;
 };
 export default ProvidersWrapper;

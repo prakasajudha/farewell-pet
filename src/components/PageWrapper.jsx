@@ -6,15 +6,15 @@ const PageWrapper = ({
   children
 }) => {
   return <>
-      <div className="wrapper">
-        <Sidebar />
-        <div className="page-content">
-          <Topbar />
-          {children}
-          <Footer />
-        </div>
+    <div className="wrapper">
+      <Sidebar />
+      <div className="page-content">
+        <Topbar />
+        {children}
+        <Footer />
       </div>
-      <Customizer />
-    </>;
+    </div>
+    <Customizer />
+  </>;
 };
 export default PageWrapper;
