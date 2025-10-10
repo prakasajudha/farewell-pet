@@ -10,7 +10,7 @@ import avatar1 from '@/assets/images/user/avatar-1.png';
 import avatar3 from '@/assets/images/user/avatar-3.png';
 import avatar5 from '@/assets/images/user/avatar-5.png';
 import avatar7 from '@/assets/images/user/avatar-7.png';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { TbSearch } from 'react-icons/tb';
 import SimpleBar from 'simplebar-react';
 import SidenavToggle from './SidenavToggle';
@@ -18,7 +18,7 @@ import ThemeModeToggle from './ThemeModeToggle';
 import { LuBellRing, LuClock, LuGem, LuHeart, LuLogOut, LuMail, LuMessagesSquare, LuMoveRight, LuSettings, LuShoppingBag, LuKey } from 'react-icons/lu';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { changePassword } from '@/service/serviceApi';
+import { changePassword, logout } from '@/service/serviceApi';
 const languages = [{
   src: UsFlag,
   label: 'English'
@@ -140,10 +140,10 @@ const profileMenu = [{
   action: 'changePassword'
 }, {
   icon: <LuLogOut className="size-4" />,
-  label: 'Sign Out',
-  to: '/login'
+  label: 'Sign Out'
 }];
 const Topbar = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [changePasswordData, setChangePasswordData] = useState({
@@ -174,6 +174,19 @@ const Topbar = () => {
   const handleProfileMenuClick = (item) => {
     if (item.action === 'changePassword') {
       setShowChangePasswordModal(true);
+    } else if (item.label === 'Sign Out') {
+      handleLogout();
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      logout();
+      toast.success('Logout berhasil! Sampai jumpa lagi.');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Gagal logout. Silakan coba lagi.');
     }
   };
 

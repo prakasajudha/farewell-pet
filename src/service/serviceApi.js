@@ -99,3 +99,39 @@ export const getLeaderboard = async () => {
         throw error;
     }
 };
+
+export const getGlobalStats = async () => {
+    try {
+        const response = await API_INSTANCE.get('/v1/message/global-stats');
+        return response;
+    } catch (error) {
+        console.error('Get global stats error:', error);
+        throw error;
+    }
+};
+
+export const getUsers = async () => {
+    try {
+        const response = await API_INSTANCE.get('/v1/user/users');
+        return response;
+    } catch (error) {
+        console.error('Get users error:', error);
+        throw error;
+    }
+};
+
+export const logout = () => {
+    try {
+        // Clear localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        // Clear cookies if any
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+        return { success: true, message: 'Logout berhasil' };
+    } catch (error) {
+        console.error('Logout error:', error);
+        throw error;
+    }
+};

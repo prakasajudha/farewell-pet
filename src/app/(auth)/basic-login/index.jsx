@@ -3,7 +3,7 @@ import logoLight from '@/assets/images/logo-light.png';
 import IconifyIcon from '@/components/client-wrapper/IconifyIcon';
 import PageMeta from '@/components/PageMeta';
 import { Link, useNavigate } from 'react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { login } from '@/service/serviceApi';
 
@@ -14,6 +14,13 @@ const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Clear any existing data when component mounts
+  useEffect(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -148,7 +155,7 @@ const Index = () => {
         <div className="text-center px-6 py-8 sm:px-10 sm:py-12">
           {/* Logo */}
           <div className="mb-8 transform hover:scale-105 transition-transform duration-300">
-            <Link to="/index" className="flex justify-center">
+            <Link to="/login" className="flex justify-center">
               <img src={logoDark} alt="logo dark" className="w-20 h-20 flex dark:hidden drop-shadow-lg" />
               <img src={logoLight} alt="logo light" className="w-20 h-20 hidden dark:flex drop-shadow-lg" />
             </Link>
@@ -251,23 +258,6 @@ const Index = () => {
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between fade-in-up">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  disabled={isLoading}
-                />
-                <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Ingat saya</span>
-              </label>
-              <Link
-                to="/auth/basic-reset-password"
-                className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
-              >
-                Lupa password?
-              </Link>
-            </div>
 
             {/* Submit Button */}
             <div className="pt-2 fade-in-up">
@@ -290,19 +280,6 @@ const Index = () => {
               </button>
             </div>
           </form>
-
-          {/* Sign Up Link */}
-          <div className="mt-8 text-center fade-in-up">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Belum punya akun?{' '}
-              <Link
-                to="/auth/basic-register"
-                className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
-              >
-                Daftar sekarang
-              </Link>
-            </p>
-          </div>
 
         </div>
       </div>

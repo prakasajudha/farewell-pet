@@ -75,6 +75,7 @@ const Settings = lazy(() => import('@/app/(admin)/(pages)/settings'));
 const Timeline = lazy(() => import('@/app/(admin)/(pages)/timeline'));
 const MessageListPersonal = lazy(() => import('@/app/(admin)/(pages)/message/list-personal'));
 const MessageList = lazy(() => import('@/app/(admin)/(pages)/message/list'));
+const Leaderboard = lazy(() => import('@/app/(admin)/(pages)/leaderboard'));
 
 //auth
 const BasicCreatePassword = lazy(() => import('@/app/(auth)/basic-create-password'));
@@ -287,6 +288,10 @@ export const layoutsRoutes = [{
   path: '/message/list',
   name: 'MessageList',
   element: <ProtectedRoute><MessageList /></ProtectedRoute>
+}, {
+  path: '/leaderboard',
+  name: 'Leaderboard',
+  element: <ProtectedRoute><Leaderboard /></ProtectedRoute>
 }];
 
 export const singlePageRoutes = [{

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
-import { sendMessage, getMessageStats, getConfiguration } from '@/service/serviceApi';
+import { sendMessage, getMessageStats, getConfiguration, getUsers } from '@/service/serviceApi';
 import Leaderboard from '@/components/Leaderboard';
 
 const Activities = () => {
@@ -22,12 +22,9 @@ const Activities = () => {
   const [configurations, setConfigurations] = useState({});
   const [configLoading, setConfigLoading] = useState(true);
 
-  // Mock data - replace with actual API call
-  const recipients = [
-    { id: 'a67dbbda-f60f-49f4-b4f4-1327f7e386ca', name: 'Dwi Luthfi Ainun Ilmi', email: 'dwi.luthfi5@gmail.com' },
-    { id: 'b3848b38-13f5-4f42-a4cd-ed8f893310dd', name: 'Ian Aditama Putra', email: 'ianaditamap14@gmail.com' },
-
-  ];
+  // Users state - loaded from API
+  const [recipients, setRecipients] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
 
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [message, setMessage] = useState('');
@@ -91,8 +88,27 @@ const Activities = () => {
       }
     };
 
+    // Load users from API
+    const loadUsers = async () => {
+      try {
+        setUsersLoading(true);
+        const response = await getUsers();
+        if (response?.data?.success) {
+          setRecipients(response?.data?.data);
+        } else {
+          toast.error(response?.data?.message || 'Gagal memuat daftar pengguna');
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+        toast.error('Gagal memuat daftar pengguna');
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
     loadConfigurations();
     loadStats();
+    loadUsers();
   }, [navigate]);
 
   const maxChars = 240;
@@ -111,6 +127,8 @@ const Activities = () => {
 
     if (!selectedRecipient) {
       newErrors.recipient = 'Pilih penerima pesan';
+    } else if (selectedRecipient.value === user?.id) {
+      newErrors.recipient = 'Tidak bisa mengirim pesan ke diri sendiri';
     }
 
     if (!message.trim()) {
@@ -129,6 +147,13 @@ const Activities = () => {
 
   const handleConfirmSend = async () => {
     try {
+      // Double-check validation before sending
+      if (selectedRecipient?.value === user?.id) {
+        toast.error('Tidak bisa mengirim pesan ke diri sendiri');
+        setShowConfirmModal(false);
+        return;
+      }
+
       setIsSending(true);
 
       // Prepare data for API
@@ -188,9 +213,18 @@ const Activities = () => {
 
   const handleRecipientChange = (selectedOption) => {
     setSelectedRecipient(selectedOption);
-    // Clear recipient error when selected
+
+    // Clear previous errors
     if (errors.recipient) {
       setErrors(prev => ({ ...prev, recipient: '' }));
+    }
+
+    // Check if user is trying to send message to themselves
+    if (selectedOption && selectedOption.value === user?.id) {
+      setErrors(prev => ({
+        ...prev,
+        recipient: 'Tidak bisa mengirim pesan ke diri sendiri'
+      }));
     }
   };
 
@@ -241,13 +275,6 @@ const Activities = () => {
             </button>
           </div>
         </div>
-      </div>
-    )}
-
-    {/* Leaderboard Section - Conditional based on SHOW_LEADER_BOARD setting */}
-    {!configLoading && configurations.SHOW_LEADER_BOARD && (
-      <div className="mb-6">
-        <Leaderboard />
       </div>
     )}
 
@@ -331,9 +358,11 @@ const Activities = () => {
                   value={selectedRecipient}
                   onChange={handleRecipientChange}
                   options={recipientOptions}
-                  placeholder="Cari nama teman..."
+                  placeholder={usersLoading ? "Memuat daftar pengguna..." : "Cari nama teman..."}
                   isSearchable
                   isClearable
+                  isLoading={usersLoading}
+                  isDisabled={usersLoading || isSending}
                   className={`react-select-container ${errors.recipient ? 'react-select-error' : ''}`}
                   classNamePrefix="react-select"
                   styles={{
@@ -369,6 +398,9 @@ const Activities = () => {
                 />
                 {errors.recipient && (
                   <p className="mt-1 text-xs text-danger">{errors.recipient}</p>
+                )}
+                {!usersLoading && recipients.length === 0 && (
+                  <p className="mt-1 text-xs text-warning">Tidak ada pengguna tersedia</p>
                 )}
               </div>
 
@@ -485,13 +517,26 @@ const Activities = () => {
             <div className="mb-6 p-4 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/20">
               <p className="text-sm text-default-700 dark:text-default-300 leading-relaxed">
                 <span className="font-medium">Kamu akan kirim pesan ini ke </span>
-                <span className="font-semibold text-primary">{selectedRecipient?.label}</span>
+                <span className={`font-semibold ${selectedRecipient?.value === user?.id ? 'text-red-600 dark:text-red-400' : 'text-primary'}`}>
+                  {selectedRecipient?.label}
+                </span>
                 <span className="font-medium"> dengan tipe </span>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${isPrivate ? 'bg-default-900 text-white dark:bg-default-700' : 'bg-primary text-white'}`}>
                   {isPrivate ? 'Rahasia' : 'Terbuka'}
                 </span>
                 <span className="font-medium">. {isPrivate ? 'Hanya kalian berdua yang bisa baca!' : 'Semua orang bisa lihat pesan ini!'}</span>
               </p>
+              {selectedRecipient?.value === user?.id && (
+                <div className="mt-3 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="font-medium">Peringatan:</span>
+                    <span>Anda tidak bisa mengirim pesan ke diri sendiri!</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4 mb-6">
@@ -556,7 +601,7 @@ const Activities = () => {
               <button
                 type="button"
                 onClick={handleConfirmSend}
-                disabled={isSending}
+                disabled={isSending || selectedRecipient?.value === user?.id}
                 className="btn bg-primary text-white flex-1 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSending ? (

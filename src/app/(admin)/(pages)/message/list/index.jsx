@@ -99,7 +99,7 @@ const MessageList = () => {
                             onClick={() => navigate('/message')}
                         >
                             <i className="ri-arrow-left-line me-2"></i>
-                            Kembali ke Pesan
+                            Kembali
                         </button>
                     </div>
                     <div className="row">
@@ -139,7 +139,7 @@ const MessageList = () => {
                         onClick={() => navigate('/message')}
                     >
                         <i className="ri-arrow-left-line me-2"></i>
-                        Kembali ke Pesan
+                        Kembali
                     </button>
                 </div>
                 <div className="row">
