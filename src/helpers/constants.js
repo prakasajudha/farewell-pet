@@ -1,14 +1,14 @@
 export const currency = '$';
 export const currentYear = new Date().getFullYear();
 export const developedByLink = '';
-export const developedBy = 'Themesdesign';
-export const contactUs = 'themesdesign.in@gmail.com';
+export const developedBy = 'Bisikberbisik';
+export const contactUs = 'bisikberbisik';
 export const buyLink = '';
 export const basePath = '';
-export const appName = 'Tailwick';
-export const DEFAULT_PAGE_TITLE = 'Tailwick - Tailwind CSS 3 Admin Layout & UI Kit Template';
-export const authorWebsite = 'https://themesdesign.in/';
-export const appAuthor = 'Themesdesign';
+export const appName = 'BisikBerbisik';
+export const DEFAULT_PAGE_TITLE = 'BisikBerbisik - BisikBerbisik';
+export const authorWebsite = '#';
+export const appAuthor = 'Bisikberbisik';
 
 // Replace the URL's value in env with your backend's URL or if you're using nextjs's API, add the server's origin URL
 export const API_BASE_PATH = '';

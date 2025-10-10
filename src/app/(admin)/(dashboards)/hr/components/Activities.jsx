@@ -177,14 +177,25 @@ const Activities = () => {
       setSelectedRecipient(null);
       setErrors({});
 
-      // Reload stats after sending message
+      // Reload stats and configuration after sending message
       try {
+        // Reload stats
         const statsResponse = await getMessageStats();
         if (statsResponse?.data?.success) {
           setStats(statsResponse?.data?.data);
         }
-      } catch (statsError) {
-        console.error('Error reloading stats:', statsError);
+
+        // Reload configuration
+        const configResponse = await getConfiguration();
+        if (configResponse?.data?.success) {
+          const configs = {};
+          configResponse?.data?.data?.forEach(config => {
+            configs[config.code] = config.is_active;
+          });
+          setConfigurations(configs);
+        }
+      } catch (error) {
+        console.error('Error reloading stats and configuration:', error);
       }
 
     } catch (error) {

@@ -140,7 +140,8 @@ const profileMenu = [{
   action: 'changePassword'
 }, {
   icon: <LuLogOut className="size-4" />,
-  label: 'Sign Out'
+  label: 'Sign Out',
+  action: 'logout'
 }];
 const Topbar = () => {
   const navigate = useNavigate();
@@ -174,7 +175,7 @@ const Topbar = () => {
   const handleProfileMenuClick = (item) => {
     if (item.action === 'changePassword') {
       setShowChangePasswordModal(true);
-    } else if (item.label === 'Sign Out') {
+    } else if (item.action === 'logout') {
       handleLogout();
     }
   };
@@ -296,8 +297,8 @@ const Topbar = () => {
           <ThemeModeToggle />
 
           <div className="topbar-item hs-dropdown relative inline-flex">
-            <button className="cursor-pointer bg-pink-100 rounded-full">
-              <img src={avatar1} alt="user" className="hs-dropdown-toggle rounded-full size-9.5" />
+            <button className="hs-dropdown-toggle cursor-pointer bg-pink-100 rounded-full">
+              <img src={avatar1} alt="user" className="rounded-full size-9.5" />
             </button>
             <div className="hs-dropdown-menu min-w-48">
               <div className="p-2">
