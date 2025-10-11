@@ -111,6 +111,17 @@ const Activities = () => {
     loadUsers();
   }, [navigate]);
 
+  const getStatsData = async () => {
+    try {
+      const response = await getMessageStats();
+      if (response?.data?.success) {
+        setStats(response?.data?.data);
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
   const maxChars = 240;
   const remaining = maxChars - message.length;
 
@@ -171,6 +182,9 @@ const Activities = () => {
 
       // Success handling
       toast.success(response?.data?.message || 'Pesan berhasil dikirim!');
+      if (response?.data?.success) {
+        getStatsData();
+      }
 
       // Reset form
       setMessage('');

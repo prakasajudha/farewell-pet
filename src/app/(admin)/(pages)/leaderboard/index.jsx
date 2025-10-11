@@ -246,8 +246,8 @@ const Leaderboard = () => {
                 </div>
 
                 {/* Message Statistics */}
-                <div className="row mb-4">
-                    <div className="col-md-4">
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="col-span-1">
                         <div className="card">
                             <div className="card-body">
                                 <div className="flex items-center gap-3">
@@ -265,7 +265,7 @@ const Leaderboard = () => {
                         </div>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-span-1">
                         <div className="card">
                             <div className="card-body">
                                 <div className="flex items-center gap-3">
@@ -283,7 +283,7 @@ const Leaderboard = () => {
                         </div>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-span-1">
                         <div className="card">
                             <div className="card-body">
                                 <div className="flex items-center gap-3">

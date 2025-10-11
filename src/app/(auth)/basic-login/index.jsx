@@ -166,6 +166,9 @@ const Index = () => {
             <h4 className="mb-2 text-2xl sm:text-3xl font-bold gradient-text">
               Selamat Datang!
             </h4>
+            <h3 className='mb-2'>
+              Bisikberbisik
+            </h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Masuk ke akun Anda untuk melanjutkan
             </p>
