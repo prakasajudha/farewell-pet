@@ -120,6 +120,28 @@ export const getUsers = async () => {
     }
 };
 
+export const toggleMessageFavorite = async (messageId) => {
+    try {
+        const response = await API_INSTANCE.post('/v1/message/toggle-favorite', {
+            message_id: messageId
+        });
+        return response;
+    } catch (error) {
+        console.error('Toggle message favorite error:', error);
+        throw error;
+    }
+};
+
+export const getFavoriteMessages = async () => {
+    try {
+        const response = await API_INSTANCE.get('/v1/message/favorites');
+        return response;
+    } catch (error) {
+        console.error('Get favorite messages error:', error);
+        throw error;
+    }
+};
+
 export const logout = () => {
     try {
         // Clear localStorage

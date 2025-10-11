@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/PageMeta';
-import { getNonPrivateMessages, getConfiguration } from '@/service/serviceApi';
+import { getNonPrivateMessages, getConfiguration, toggleMessageFavorite } from '@/service/serviceApi';
 import { toast } from 'react-toastify';
 
 const MessageList = () => {
@@ -10,6 +10,15 @@ const MessageList = () => {
     const [loading, setLoading] = useState(true);
     const [configurations, setConfigurations] = useState({});
     const [configLoading, setConfigLoading] = useState(true);
+    const [user, setUser] = useState(null);
+
+    // Load user data
+    useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
+    }, []);
 
     // Load configurations and messages from API
     useEffect(() => {
@@ -63,6 +72,33 @@ const MessageList = () => {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const handleToggleFavorite = async (messageId) => {
+        if (!user?.is_admin && !user?.is_semi_admin) {
+            toast.error('Hanya admin atau semi admin yang dapat menandai pesan sebagai favorit');
+            return;
+        }
+
+        try {
+            const response = await toggleMessageFavorite(messageId);
+            if (response?.data?.success) {
+                // Update the message in the local state
+                setMessages(prevMessages =>
+                    prevMessages.map(msg =>
+                        msg.id === messageId
+                            ? { ...msg, is_favorited: response.data.data.is_favorited }
+                            : msg
+                    )
+                );
+                toast.success(response.data.message || 'Status favorit berhasil diubah');
+            } else {
+                toast.error(response?.data?.message || 'Gagal mengubah status favorit');
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            toast.error('Gagal mengubah status favorit');
+        }
     };
 
     if (configLoading || loading) {
@@ -171,7 +207,10 @@ const MessageList = () => {
                                         {messages.map((message) => (
                                             <div
                                                 key={message?.id}
-                                                className="p-6 rounded-xl border border-default-200 bg-white dark:bg-default-800"
+                                                className={`p-6 rounded-xl border bg-white dark:bg-default-800 relative transition-all duration-300 ${(user.is_admin || user?.is_semi_admin) && message?.is_favorited
+                                                    ? 'border-green-300 bg-green-50/30 dark:bg-green-900/20 dark:border-green-600 shadow-lg hover:shadow-xl'
+                                                    : 'border border-default-200'
+                                                    }`}
                                             >
                                                 <div className="flex items-start justify-between mb-4">
                                                     <div className="flex items-center gap-3">
@@ -188,6 +227,18 @@ const MessageList = () => {
                                                             </span>
                                                         </div>
                                                     </div>
+                                                    {(user?.is_admin || user?.is_semi_admin) && (
+                                                        <button
+                                                            onClick={() => handleToggleFavorite(message?.id)}
+                                                            className={`p-2 rounded-full transition-all duration-300 border ${message?.is_favorited
+                                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-200 dark:hover:bg-green-800/40'
+                                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                }`}
+                                                            title={message?.is_favorited ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+                                                        >
+                                                            <i className={`${message?.is_favorited ? 'ri-heart-fill' : 'ri-heart-line'} text-lg`}></i>
+                                                        </button>
+                                                    )}
                                                 </div>
 
                                                 <div className="mb-4 p-4 rounded-lg bg-default-50 dark:bg-default-700/50">
@@ -207,6 +258,12 @@ const MessageList = () => {
                                                         <i className="ri-time-line"></i>
                                                         {formatDate(message?.created_at)}
                                                     </span>
+                                                    {(message?.is_favorited && (user?.is_admin || user?.is_semi_admin)) && (
+                                                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                                                            <i className="ri-heart-fill"></i>
+                                                            Favorit
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}

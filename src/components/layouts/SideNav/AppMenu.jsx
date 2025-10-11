@@ -75,24 +75,26 @@ const AppMenu = () => {
               });
               setConfigurations(configs);
 
-              // Get menu items based on admin status and configurations
+              // Get menu items based on admin/semi-admin status and configurations
               const isAdmin = parsedUser.is_admin || false;
-              const items = getMenuItemsData(isAdmin, configs);
+              const isSemiAdmin = parsedUser.is_semi_admin || false;
+              const items = getMenuItemsData(isAdmin, isSemiAdmin, configs);
               setMenuItems(items);
             } else {
               // Fallback without configurations
               const isAdmin = parsedUser.is_admin || false;
-              const items = getMenuItemsData(isAdmin, {});
+              const isSemiAdmin = parsedUser.is_semi_admin || false;
+              const items = getMenuItemsData(isAdmin, isSemiAdmin, {});
               setMenuItems(items);
             }
           } catch (error) {
             console.error('Error parsing user data:', error);
             // Fallback to non-admin menu
-            setMenuItems(getMenuItemsData(false, {}));
+            setMenuItems(getMenuItemsData(false, false, {}));
           }
         } else {
           // No user data, show non-admin menu
-          setMenuItems(getMenuItemsData(false, {}));
+          setMenuItems(getMenuItemsData(false, false, {}));
         }
       } catch (error) {
         console.error('Error loading configurations:', error);
@@ -102,12 +104,13 @@ const AppMenu = () => {
           try {
             const parsedUser = JSON.parse(userData);
             const isAdmin = parsedUser.is_admin || false;
-            setMenuItems(getMenuItemsData(isAdmin, {}));
+            const isSemiAdmin = parsedUser.is_semi_admin || false;
+            setMenuItems(getMenuItemsData(isAdmin, isSemiAdmin, {}));
           } catch (parseError) {
-            setMenuItems(getMenuItemsData(false, {}));
+            setMenuItems(getMenuItemsData(false, false, {}));
           }
         } else {
-          setMenuItems(getMenuItemsData(false, {}));
+          setMenuItems(getMenuItemsData(false, false, {}));
         }
       }
     };

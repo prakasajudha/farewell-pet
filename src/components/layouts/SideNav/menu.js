@@ -1,7 +1,7 @@
 import { LuCalendar1, LuCircuitBoard, LuSettings, LuClipboardList, LuCodesandbox, LuFileText, LuFingerprint, LuLayoutPanelLeft, LuLock, LuMail, LuMessagesSquare, LuMonitorDot, LuPackage, LuPictureInPicture2, LuShare2, LuShieldCheck, LuShoppingBag, LuSquareUserRound, LuTrophy } from 'react-icons/lu';
 
 // Function to get menu items based on user admin status and configurations
-export const getMenuItemsData = (isAdmin = false, configurations = {}) => {
+export const getMenuItemsData = (isAdmin = false, isSemiAdmin = false, configurations = {}) => {
   const baseMenuItems = [
     {
       key: 'FITUR UTAMA',
@@ -26,7 +26,7 @@ export const getMenuItemsData = (isAdmin = false, configurations = {}) => {
     });
   }
 
-  // Admin-only menu items
+  // Admin-only menu items (for full admin)
   const adminMenuItems = [
     {
       key: 'Admin',
@@ -41,9 +41,34 @@ export const getMenuItemsData = (isAdmin = false, configurations = {}) => {
     }
   ];
 
-  // Return menu items based on admin status
+  // Admin/Semi-admin menu items (for both admin and semi-admin)
+  const adminSemiAdminMenuItems = [
+    {
+      key: 'Admin',
+      label: 'Admin',
+      isTitle: true
+    },
+    {
+      key: 'BestMessage',
+      label: 'Best Message',
+      icon: LuMessagesSquare,
+      href: '/message/list-favorite'
+    }
+  ];
+
+  // Add Settings only for full admin
   if (isAdmin) {
-    return [...baseMenuItems, ...adminMenuItems];
+    adminSemiAdminMenuItems.push({
+      key: 'Settings',
+      label: 'Settings',
+      icon: LuSettings,
+      href: '/settings'
+    });
+  }
+
+  // Return menu items based on admin/semi-admin status
+  if (isAdmin || isSemiAdmin) {
+    return [...baseMenuItems, ...adminSemiAdminMenuItems];
   } else {
     return baseMenuItems;
   }

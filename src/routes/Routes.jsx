@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AdminRoute from '@/components/AdminRoute';
+import AdminSemiAdminRoute from '@/components/AdminSemiAdminRoute';
 
 // admin Ecommerce
 
@@ -75,6 +76,7 @@ const Settings = lazy(() => import('@/app/(admin)/(pages)/settings'));
 const Timeline = lazy(() => import('@/app/(admin)/(pages)/timeline'));
 const MessageListPersonal = lazy(() => import('@/app/(admin)/(pages)/message/list-personal'));
 const MessageList = lazy(() => import('@/app/(admin)/(pages)/message/list'));
+const MessageListFavorite = lazy(() => import('@/app/(admin)/(pages)/message/list-favorite'));
 const Leaderboard = lazy(() => import('@/app/(admin)/(pages)/leaderboard'));
 
 //auth
@@ -288,6 +290,10 @@ export const layoutsRoutes = [{
   path: '/message/list',
   name: 'MessageList',
   element: <ProtectedRoute><MessageList /></ProtectedRoute>
+}, {
+  path: '/message/list-favorite',
+  name: 'MessageListFavorite',
+  element: <AdminSemiAdminRoute><MessageListFavorite /></AdminSemiAdminRoute>
 }, {
   path: '/leaderboard',
   name: 'Leaderboard',
