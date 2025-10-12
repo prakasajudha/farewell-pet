@@ -2,7 +2,7 @@ const PageMeta = ({
   title
 }) => {
   return <title>
-    {title ? `${title} | PET PPN Batch 4` : ' PET PPN Batch 4'}
+    {title ? `${title} | ABHIVARDHANA ANVAYA` : 'ABHIVARDHANA ANVAYA'}
   </title>;
 };
 export default PageMeta;
