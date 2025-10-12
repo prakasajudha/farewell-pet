@@ -179,6 +179,7 @@ const Activities = () => {
 
       // Call API to send message
       const response = await sendMessage(messageData);
+      console.log(response, ' ini apa')
 
       // Success handling
       toast.success(response?.data?.message || 'Pesan berhasil dikirim!');
@@ -214,6 +215,12 @@ const Activities = () => {
 
     } catch (error) {
       console.error('Send message error:', error);
+
+      if (error.response?.status === 500) {
+        toast.error(error.response?.data?.message);
+        setShowConfirmModal(false);
+        return;
+      }
 
       // Error handling is already done in the service interceptor
       // But we can add specific handling here if needed
