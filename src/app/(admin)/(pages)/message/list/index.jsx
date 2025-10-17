@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/PageMeta';
 import { getNonPrivateMessages, getConfiguration, toggleMessageFavorite } from '@/service/serviceApi';
 import { toast } from 'react-toastify';
+import { VERSION_LABELS } from '@/helpers/constants';
 
 const MessageList = () => {
     const navigate = useNavigate();
@@ -216,15 +217,26 @@ const MessageList = () => {
                                                     <div className="flex items-center gap-3">
                                                         <div>
                                                             <h6 className="font-bold text-xl text-default-800 dark:text-white mb-2">
-                                                                {message?.sender?.nickname}
+                                                                {message?.created_by}
                                                             </h6>
-                                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${message?.is_private
-                                                                ? 'bg-default-900 text-white dark:bg-default-700'
-                                                                : 'bg-secondary/10 text-secondary'
-                                                                }`}>
-                                                                <i className={`me-1 ${message?.is_private ? 'ri-lock-line' : 'ri-global-line'}`}></i>
-                                                                {message?.is_private ? 'Rahasia' : 'Public'}
-                                                            </span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${message?.is_private
+                                                                    ? 'bg-default-900 text-white dark:bg-default-700'
+                                                                    : 'bg-secondary/10 text-secondary'
+                                                                    }`}>
+                                                                    <i className={`me-1 ${message?.is_private ? 'ri-lock-line' : 'ri-global-line'}`}></i>
+                                                                    {message?.is_private ? 'Rahasia' : 'Public'}
+                                                                </span>
+                                                                {message?.version && (
+                                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${message?.version === 1
+                                                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                                                                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                                        }`}>
+                                                                        <i className="ri-code-line me-1"></i>
+                                                                        {VERSION_LABELS[message?.version] || `Version ${message?.version}`}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     {(user?.is_admin || user?.is_semi_admin) && (
