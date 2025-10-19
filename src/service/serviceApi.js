@@ -142,6 +142,16 @@ export const getFavoriteMessages = async () => {
     }
 };
 
+export const registerUser = async (userData) => {
+    try {
+        const response = await API_INSTANCE.post('/v1/user/register', userData);
+        return response;
+    } catch (error) {
+        console.error('Register user error:', error);
+        throw error;
+    }
+};
+
 export const logout = () => {
     try {
         // Clear localStorage

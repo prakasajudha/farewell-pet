@@ -45,6 +45,7 @@ const InvoiceOverview = lazy(() => import('@/app/(admin)/(app)/(invoice)/overvie
 
 const UserGrid = lazy(() => import('@/app/(admin)/(app)/(users)/users-grid'));
 const UserList = lazy(() => import('@/app/(admin)/(app)/(users)/users-list'));
+const RegisterUser = lazy(() => import('@/app/(admin)/(app)/(users)/register-user'));
 const Calender = lazy(() => import('@/app/(admin)/(app)/calendar'));
 const Chat = lazy(() => import('@/app/(admin)/(app)/chat'));
 const MailBox = lazy(() => import('@/app/(admin)/(app)/mailbox'));
@@ -278,6 +279,10 @@ export const layoutsRoutes = [{
   path: '/message',
   name: 'Message',
   element: <ProtectedRoute><Hr /></ProtectedRoute>
+}, {
+  path: '/register-user',
+  name: 'RegisterUser',
+  element: <AdminRoute><RegisterUser /></AdminRoute>
 }, {
   path: '/settings',
   name: 'Settings',
